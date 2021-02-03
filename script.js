@@ -2,38 +2,40 @@ const statusDisplay = document.querySelector(".game--status");
 
 let gameActive = true;
 
-let currentPlayer = "X";
+let currentPlayer = "1";
+
+let currentSymbol = "X";
 
 let gameState = ["", "", "", "", "", "", "", "", ""];
 
-//TODO: Explain why function and not simple variable
-const winningMessage = () => `Player ${currentPlayer} has won!`;
+const winningMessage = () => alert(`Congratulations! Player${currentPlayer} wins`);
 
-const drawMessage = () => `Game ended in a draw`;
+const drawMessage = () => alert(`Draw!`);
 
-const currentPlayerTurn = () => `It's ${currentPlayer}'s turn`;
+const currentPlayerTurn = () => `It's Player${currentPlayer}'s turn`;
 
 statusDisplay.innerHTML = currentPlayerTurn();
 
 function handleCellPlayed(clickedCell, clickedCellIndex) {
-  gameState[clickedCellIndex] = currentPlayer;
+  gameState[clickedCellIndex - 1] = currentPlayer;
 
-  clickedCell.innerHTML = currentPlayer;
+  clickedCell.innerHTML = currentSymbol;
 }
 
 const winningConditions = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
   [1, 4, 7],
   [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
+  [3, 6, 9],
+  [1, 5, 9],
+  [3, 5, 7],
 ];
 
 function handlePlayerChange() {
-  currentPlayer = currentPlayer === "X" ? "O" : "X";
+  currentPlayer = currentPlayer === "1" ? "2" : "1";
+  currentSymbol = currentSymbol == "O" ? "X" : "O";
   statusDisplay.innerHTML = currentPlayerTurn();
 }
 
@@ -43,9 +45,9 @@ function handleResultValidation() {
   for (let i = 0; i < winningConditions.length; i++) {
     const condition = winningConditions[i];
 
-    let a = gameState[condition[0]];
-    let b = gameState[condition[1]];
-    let c = gameState[condition[2]];
+    let a = gameState[condition[0] - 1];
+    let b = gameState[condition[1] - 1];
+    let c = gameState[condition[2] - 1];
 
     if (a === "" || b === "" || c === "") {
       continue;
@@ -58,15 +60,17 @@ function handleResultValidation() {
   }
 
   if (roundWon) {
-    statusDisplay.innerHTML = winningMessage();
+    statusDisplay.innerHTML = `Congratulations! Player${currentPlayer} wins`;
+    winningMessage();
     gameActive = false;
     return;
   }
 
   //Handle Draw Condition
   let roundDraw = !gameState.includes("");
-  if (roundDraw) {
-    statusDisplay.innerHTML = drawMessage();
+  if (roundDraw && !roundWon) {
+    statusDisplay.innerHTML = "Draw!";
+    drawMessage();
     gameActive = false;
     return;
   }
@@ -76,12 +80,10 @@ function handleResultValidation() {
 
 function handleCellClick(clickedCellEvent) {
   const clickedCell = clickedCellEvent.target;
+  const clickedCellIndex = parseInt(clickedCell.id);
 
-  const clickedCellIndex = parseInt(
-    clickedCell.getAttribute("data-cell-index")
-  );
-
-  if (gameState[clickedCellIndex] !== "" || !gameActive) {
+  //if game is over or that cell has already been marked
+  if (gameState[clickedCellIndex - 1] !== "" || !gameActive) {
     return;
   }
 
@@ -95,7 +97,7 @@ function handleCellClick(clickedCellEvent) {
 
 function handleRestartGame() {
   gameActive = true;
-  currentPlayer = "X";
+  currentPlayer = "1";
   gameState = ["", "", "", "", "", "", "", "", ""];
   statusDisplay.innerHTML = currentPlayerTurn();
   document.querySelectorAll(".cell").forEach((cell) => (cell.innerHTML = ""));
